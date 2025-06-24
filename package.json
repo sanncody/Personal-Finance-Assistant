@@ -11,7 +11,7 @@
     "AI",
     "Agent"
   ],
-  "author": "Sandeep Wadhawan",
+  "author": "Sandeep Wadhawan <sandeepwadhawan2001@gmail.com>",
   "license": "ISC",
   "devDependencies": {
     "globals": "^16.2.0"
