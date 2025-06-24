@@ -1,0 +1,16 @@
+{
+  "name": "first-ai-agent",
+  "version": "1.0.0",
+  "description": "This is my first-AI-agent building.",
+  "main": "agent.js",
+  "scripts": {
+    "dev": "nodemon --env-file=.env agent.js"
+  },
+  "keywords": [
+    "LLM",
+    "AI",
+    "Agent"
+  ],
+  "author": "Sandeep Wadhawan",
+  "license": "ISC"
+}
