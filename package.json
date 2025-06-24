@@ -12,5 +12,8 @@
     "Agent"
   ],
   "author": "Sandeep Wadhawan",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "globals": "^16.2.0"
+  }
 }
