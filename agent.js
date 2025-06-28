@@ -5,18 +5,21 @@ const groq = new Groq({
 });
 
 const callAgent = async () => {
-    const completion = await groq.chat.completions.create({
-        messages: [
-            {
-                role: "system",
-                content: `You are Personal finance Assistant. Your task is to assist users with their expenses, balances, and financial planning.
+    const messages = [
+        {
+            role: "system",
+            content: `You are Personal finance Assistant. Your task is to assist users with their expenses, balances, and financial planning.
                 current DateTime: ${new Date().toUTCString()}`
-            },
-            {
-                role: "user", //Role: User means end-user message
-                content: "How much money I have spent this month?",
-            },
-        ],
+        },
+    ];
+
+    messages.push({
+        role: "user", //Role: User means end-user message
+        content: "How much money I have spent this month?",
+    });
+
+    const completion = await groq.chat.completions.create({
+        messages: messages,
         model: "llama-3.3-70b-versatile",
         tools: [
             {
@@ -43,6 +46,7 @@ const callAgent = async () => {
     });
 
     console.log(JSON.stringify(completion.choices[0], null, 2));
+    messages.push(completion.choices[0].message);
 
     const toolCalls = completion.choices[0].message.tool_calls;
 
@@ -62,22 +66,7 @@ const callAgent = async () => {
         }
         
         const completionAgain = await groq.chat.completions.create({
-            messages: [
-                {
-                    role: "system",
-                    content: `You are Personal finance Assistant. Your task is to assist users with their expenses, balances, and financial planning.
-                current DateTime: ${new Date().toUTCString()}`
-                },
-                {
-                    role: "user", //Role: User means end-user message
-                    content: "How much money I have spent this month?",
-                },
-                {
-                    role: "tool",
-                    content: result,
-                    tool_call_id: tool.id
-                }
-            ],
+            messages: messages,
             model: "llama-3.3-70b-versatile",
             tools: [
                 {
@@ -105,6 +94,10 @@ const callAgent = async () => {
 
         console.log(completionAgain.choices[0]);
     }
+
+    console.log("=========================================");
+    console.log("Messages", messages);
+    
 };
 
 callAgent();
