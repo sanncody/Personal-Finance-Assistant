@@ -27,7 +27,7 @@ const callAgent = async () => {
                 function: {
                     name: 'getTotalExpense',
                     description: "It returns us total expense from between from and to date.",
-                    parameters:{
+                    parameters: {
                         type: "object",
                         properties: {
                             from: {
@@ -39,7 +39,7 @@ const callAgent = async () => {
                                 description: "To date to get the expense."
                             }
                         }
-                    } 
+                    }
                 }
             }
         ],
@@ -64,9 +64,14 @@ const callAgent = async () => {
         if (functionName === 'getTotalExpense') {
             result = getTotalExpense(JSON.parse(functionArgs)).toString();
         }
-        
+
+        messages.push({
+            role: "tool",
+            content: result,
+            tool_call_id: tool.id
+        });
         const completionAgain = await groq.chat.completions.create({
-            messages: messages,
+            messages,
             model: "llama-3.3-70b-versatile",
             tools: [
                 {
@@ -97,7 +102,7 @@ const callAgent = async () => {
 
     console.log("=========================================");
     console.log("Messages", messages);
-    
+
 };
 
 callAgent();
