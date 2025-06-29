@@ -4,6 +4,8 @@ const groq = new Groq({
     apiKey: process.env.GROQ_API_KEY
 });
 
+const expenseDB = [];
+
 const callAgent = async () => {
     const messages = [
         {
@@ -15,7 +17,7 @@ const callAgent = async () => {
 
     messages.push({
         role: "user", //Role: User means end-user message
-        content: "How much money I have spent this month?",
+        content: "Hello buddy, I just bought a new washing machine for 30000",
     });
 
     while (true) {
@@ -42,6 +44,26 @@ const callAgent = async () => {
                             }
                         }
                     }
+                },
+                {
+                    type: 'function',
+                    function: {
+                        name: 'addExpense',
+                        description: "It adds new expense entry to the expense database.",
+                        parameters: {
+                            type: "object",
+                            properties: {
+                                name: {
+                                    type: "string",
+                                    description: "Name of the expense. Eg: Bought a washing machine"
+                                },
+                                amount: {
+                                    type: "string",
+                                    description: "Amount of the expense."
+                                }
+                            }
+                        }
+                    }
                 }
             ],
         });
@@ -60,10 +82,13 @@ const callAgent = async () => {
         for (let tool of toolCalls) {
             const functionName = tool.function.name;
             const functionArgs = tool.function.arguments;
-
+            console.log("FunctionName", functionName);
+            console.log("FunctionArgs", functionArgs);
             let result = "";
             if (functionName === 'getTotalExpense') {
                 result = getTotalExpense(JSON.parse(functionArgs)).toString();
+            } else if (functionName === 'addExpense') {
+                result = addExpense(JSON.parse(functionArgs));
             }
 
             messages.push({
@@ -76,6 +101,8 @@ const callAgent = async () => {
 
         console.log("=========================================");
         console.log("MESSAGES", messages);
+        console.log("=========================================");
+        console.log("DB: ", expenseDB);
     }
 
 };
@@ -90,5 +117,16 @@ function getTotalExpense({ from, to }) {
     console.log("Calling getTotalExpense tool...");
 
     // In reality, we call DB here...
-    return 20000;
+    const expense = expenseDB.reduce((acc, item) => {
+        return acc + item.amount;
+    }, 0);
+
+    return `${expense} INR`;
+}
+
+function addExpense({ name, amount }) {
+    console.log(`Adding ${amount} to expense DB for ${name}`);
+    expenseDB.push({ name, amount });
+    
+    return "Added to the DB.";
 }
