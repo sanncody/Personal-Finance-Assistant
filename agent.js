@@ -6,6 +6,7 @@ const groq = new Groq({
 });
 
 const expenseDB = [];
+const incomeDB = [];
 
 const callAgent = async () => {
     const rl = readline.createInterface({
@@ -20,6 +21,8 @@ const callAgent = async () => {
             You have access to following tools:
             1. getTotalExpense({ from, to }): string // Get total expense for a time period. 
             2. addExpense({ name, amount }): string // Add new expense to the expense database.
+            3. addIncome({ name, amount }): string // Add new income to the income database.
+            4. getMoneyBalance(): string // Getting remaining balance from database.
 
             Current DateTime: ${new Date().toUTCString()}`
         },
@@ -83,7 +86,34 @@ const callAgent = async () => {
                                 }
                             }
                         }
-                    }
+                    },
+                    {
+                        type: 'function',
+                        function: {
+                            name: 'addIncome',
+                            description: "Add new income entry to income database.",
+                            parameters: {
+                                type: "object",
+                                properties: {
+                                    name: {
+                                        type: "string",
+                                        description: "Name of the income. Eg: Got Salary from company"
+                                    },
+                                    amount: {
+                                        type: "string",
+                                        description: "Amount of the income."
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        type: 'function',
+                        function: {
+                            name: 'getMoneyBalance',
+                            description: "Get remaining money balance from database",
+                        }
+                    },
                 ],
             });
 
@@ -107,6 +137,10 @@ const callAgent = async () => {
                     result = getTotalExpense(JSON.parse(functionArgs)).toString();
                 } else if (functionName === 'addExpense') {
                     result = addExpense(JSON.parse(functionArgs));
+                } else if (functionName === 'addIncome') {
+                    result = addIncome(JSON.parse(functionArgs));
+                } else if (functionName === 'getMoneyBalance') {
+                    result = getMoneyBalance(JSON.parse(functionArgs));
                 }
 
                 messages.push({
@@ -147,5 +181,18 @@ function addExpense({ name, amount }) {
     // console.log(`Adding ${amount} to expense DB for ${name}`);
     expenseDB.push({ name, amount });
     
-    return "Added to the DB.";
+    return "Added to the expense DB.";
+}
+
+function addIncome({ name, amount }) {
+    incomeDB.push({ name, amount });
+
+    return "Added income to the income DB.";
+}
+
+function getMoneyBalance() {
+    const totalIncome = incomeDB.reduce((acc, item) => acc + item.amount, 0);
+    const totalExpense = expenseDB.reduce((acc, item) => acc + item.amount, 0);
+
+    return `${totalIncome - totalExpense} INR`;
 }
